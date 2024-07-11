@@ -16,7 +16,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '8.0.x' # specify the version of .NET you are using
+        dotnet-version: '8.0.x'
 
     - name: Restore dependencies
       run: dotnet restore
@@ -29,6 +29,9 @@ jobs:
 
     - name: Publish
       run: dotnet publish -c Release -o ./publish
+
+    - name: Start SSH Server in WSL
+      run: sudo /usr/sbin/sshd
 
     - name: Deploy to Localhost
       env:

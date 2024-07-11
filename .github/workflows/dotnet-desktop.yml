@@ -30,9 +30,12 @@ jobs:
     - name: Publish
       run: dotnet publish -c Release -o ./publish
 
-    - name: Deploy to Server
+    - name: Deploy to Localhost
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        echo "Deploying to server..."
-        # Add deployment script here (e.g., copy files to the server, restart services, etc.)
-        # For example, using scp to copy files to a remote server:
-        scp -r ./publish/* user@your-server:/path/to/deploy/
+        echo "$SSH_PRIVATE_KEY" > private_key
+        chmod 600 private_key
+        scp -i private_key -r ./publish/* srikanth@localhost:/path/to/deploy/
+        ssh -i private_key srikanth@localhost 'sudo systemctl restart your-app-service'
+        rm private_key

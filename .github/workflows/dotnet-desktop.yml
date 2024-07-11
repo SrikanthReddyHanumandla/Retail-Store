@@ -31,14 +31,20 @@ jobs:
       run: dotnet publish -c Release -o ./publish
 
     - name: Start SSH Server in WSL
-      run: sudo /usr/sbin/sshd
+      run: sudo service ssh start
+
+    - name: Ensure deployment directory exists
+      run: |
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key
+        chmod 600 private_key
+        ssh -i private_key srikanth@localhost 'mkdir -p /home/srikanth/action-runners/deploy'
 
     - name: Deploy to Localhost
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        echo "$SSH_PRIVATE_KEY" > private_key
+        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key
         chmod 600 private_key
-        scp -i private_key -r ./publish/* srikanth@localhost:/path/to/deploy/
+        scp -i private_key -r ./publish/* srikanth@localhost:/home/srikanth/action-runners/deploy/
         ssh -i private_key srikanth@localhost 'sudo systemctl restart your-app-service'
         rm private_key
